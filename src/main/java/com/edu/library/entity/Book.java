@@ -1,6 +1,7 @@
 package com.edu.library.entity;
 
 
+import com.edu.library.enums.BookStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -75,12 +76,14 @@ public class Book {
     @Column(name = "deleted")
     private Boolean deleted = false;
 
+    // Helper method - Giảm số lượng
     public void decreaseAvailableCopies() {
         if (this.availableCopies > 0) {
             this.availableCopies--;
         }
     }
 
+    // Helper method - Tăng số lượng
     public void increaseAvailableCopies() {
         if (this.availableCopies < this.totalCopies) {
             this.availableCopies++;
@@ -88,6 +91,7 @@ public class Book {
         }
     }
 
+    // Helper method - Cập nhật lại trạng thái theo số lượng
     private void updateStatus() {
         if (this.availableCopies == 0) {
             this.status = BookStatus.BORROWED;
@@ -96,7 +100,15 @@ public class Book {
         }
     }
 
+    // Helper method - Chuyển trạng thái thành xóa
     public void softDelete() {
         this.deleted = true;
+    }
+
+    // Helper method - Kiểm tra sách có available không
+    public boolean isAvailableForBorrow() {
+        return availableCopies > 0 &&
+                status == BookStatus.AVAILABLE &&
+                !deleted;
     }
 }

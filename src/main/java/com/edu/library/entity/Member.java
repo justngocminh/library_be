@@ -1,5 +1,8 @@
 package com.edu.library.entity;
 
+import com.edu.library.enums.BorrowStatus;
+import com.edu.library.enums.MemberStatus;
+import com.edu.library.enums.MemberType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -60,10 +63,6 @@ public class Member {
     @Column(name = "max_borrow_books", nullable = false)
     private Integer maxBorrowBooks = 5;
 
-    // One-to-Many với BorrowRecord
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<BorrowRecord> borrowRecords = new ArrayList<>();
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -72,8 +71,30 @@ public class Member {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Helper method
+    // Helper method - Lấy tên đầy đủ
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
+    // One-to-Many với BorrowRecord
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<BorrowRecord> borrowRecords = new ArrayList<>();
+
+    // Helper method - Kiểm tra member có thể mượn thêm sách không
+    public boolean canBorrowMoreBooks() {
+        long currentlyBorrowed = borrowRecords.stream()
+                .filter(record -> record.getStatus() == BorrowStatus.BORROWED ||
+                        record.getStatus() == BorrowStatus.RENEWED)
+                .count();
+        return currentlyBorrowed < maxBorrowBooks;
+    }
+
+    // Helper method - Lấy số sách đang mượn
+    public long getCurrentlyBorrowedCount() {
+        return borrowRecords.stream()
+                .filter(record -> record.getStatus() == BorrowStatus.BORROWED ||
+                        record.getStatus() == BorrowStatus.RENEWED)
+                .count();
+    }
+
 }

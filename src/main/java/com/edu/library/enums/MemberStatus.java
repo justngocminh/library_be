@@ -1,4 +1,4 @@
-package com.edu.library.entity;
+package com.edu.library.enums;
 
 public enum MemberStatus {
     ACTIVE,
